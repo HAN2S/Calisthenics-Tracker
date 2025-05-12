@@ -1,43 +1,34 @@
-/* Styles for the #root container, avoiding position, transform, or opacity to prevent stacking context issues */
 #root {
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+  box-sizing: border-box; /* Ensure padding doesn't affect width */
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.main-content {
+  margin-left: 220px;
+  padding: 20px;
+  transition: margin-left 0.3s ease;
+  width: 100%; /* Ensure full width */
+  box-sizing: border-box; /* Include padding in width */
+  overflow-x: hidden; /* Prevent horizontal overflow */
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 170px;
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.main-content.nav-closed {
+  margin-left: 0;
+  width: 100%; /* Ensure full width when nav is closed */
 }
 
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
+.calendar-container {
+  width: 100%;
+  box-sizing: border-box;
+  max-width: none; /* Override #root's max-width */
+  overflow-x: auto; /* Allow horizontal scrolling if content overflows */
 }

@@ -3,6 +3,7 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction';
 import { EventClickArg } from '@fullcalendar/core';
+import './Calendar.css';
 
 interface Workout {
   id: number;
@@ -14,9 +15,10 @@ interface CalendarProps {
   workouts: Workout[];
   onDateClick: (date: string) => void;
   onEventClick: (workoutId: string) => void;
+  isOpen: boolean; // Add isOpen prop
 }
 
-const Calendar: React.FC<CalendarProps> = ({ workouts, onDateClick, onEventClick }) => {
+const Calendar: React.FC<CalendarProps> = ({ workouts, onDateClick, onEventClick, isOpen }) => {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const calendarRef = useRef<FullCalendar>(null);
 
@@ -26,6 +28,17 @@ const Calendar: React.FC<CalendarProps> = ({ workouts, onDateClick, onEventClick
       calendarRef.current.getApi().gotoDate(currentDate);
     }
   }, [currentDate]);
+
+  // Update calendar size when isOpen changes with a slight delay
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (calendarRef.current) {
+        const calendarApi = calendarRef.current.getApi();
+        calendarApi.updateSize(); // Force size update
+      }
+    }, 100); // Small delay to ensure DOM updates
+    return () => clearTimeout(timer); // Cleanup timer
+  }, [isOpen]);
 
   // Map workouts to FullCalendar events, considering recurring workouts
   const events = workouts.map(workout => {
@@ -78,95 +91,39 @@ const Calendar: React.FC<CalendarProps> = ({ workouts, onDateClick, onEventClick
   });
 
   return (
-    <div style={{ marginBottom: '32px', position: 'relative', zIndex: 0 }}>
+    <div className="calendar-wrapper">
       {/* Custom Header with Navigation */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: '16px',
-          padding: '0 16px',
-        }}
-      >
-        <h2
-          style={{
-            fontSize: '20px',
-            fontWeight: 400,
-            color: '#202124',
-            textTransform: 'capitalize',
-          }}
-        >
-          {formattedMonthYear}
-        </h2>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <button
-            onClick={handlePrevMonth}
-            style={{
-              width: '32px',
-              height: '32px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border: '1px solid #dadce0',
-              borderRadius: '50%',
-              backgroundColor: '#fff',
-              color: '#5f6368',
-              cursor: 'pointer',
-              fontSize: '16px',
-            }}
-          >
+      <div className="calendar-header">
+        <h2 className="calendar-title">{formattedMonthYear}</h2>
+        <div className="calendar-nav-buttons">
+          <button className="nav-button prev-button" onClick={handlePrevMonth}>
             &lt;
           </button>
-          <button
-            onClick={handleToday}
-            style={{
-              padding: '4px 12px',
-              border: '1px solid #dadce0',
-              borderRadius: '4px',
-              backgroundColor: '#fff',
-              color: '#5f6368',
-              cursor: 'pointer',
-              fontSize: '14px',
-            }}
-          >
+          <button className="nav-button today-button" onClick={handleToday}>
             Today
           </button>
-          <button
-            onClick={handleNextMonth}
-            style={{
-              width: '32px',
-              height: '32px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border: '1px solid #dadce0',
-              borderRadius: '50%',
-              backgroundColor: '#fff',
-              color: '#5f6368',
-              cursor: 'pointer',
-              fontSize: '16px',
-            }}
-          >
+          <button className="nav-button next-button" onClick={handleNextMonth}>
             &gt;
           </button>
         </div>
       </div>
 
-      <FullCalendar
-        ref={calendarRef}
-        plugins={[dayGridPlugin, interactionPlugin]}
-        initialView="dayGridMonth"
-        events={events}
-        dateClick={handleDateClick}
-        eventClick={handleEventClick}
-        initialDate={currentDate}
-        dayHeaderFormat={{ weekday: 'short' }}
-        locale="en"
-        headerToolbar={false}
-        height="auto"
-        eventTimeFormat={{ hour: undefined, minute: undefined }}
-      />
+      <div className="calendar-container">
+        <FullCalendar
+          ref={calendarRef}
+          plugins={[dayGridPlugin, interactionPlugin]}
+          initialView="dayGridMonth"
+          events={events}
+          dateClick={handleDateClick}
+          eventClick={handleEventClick}
+          initialDate={currentDate}
+          dayHeaderFormat={{ weekday: 'short' }}
+          locale="en"
+          headerToolbar={false}
+          height="auto"
+          eventTimeFormat={{ hour: undefined, minute: undefined }}
+        />
+      </div>
     </div>
   );
 };

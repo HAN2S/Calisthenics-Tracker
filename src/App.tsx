@@ -1,7 +1,10 @@
 import { useState } from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Calendar from './components/Calendar';
 import WorkoutForm from './components/WorkoutForm';
+import SideNav from './components/SideNav';
 import { initialExercises, ExerciseCategory } from './utils/exercises';
+import './App.css';
 
 interface Workout {
   id: number;
@@ -14,6 +17,7 @@ function App() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [editingWorkout, setEditingWorkout] = useState<Workout | null>(null);
   const [showDetails, setShowDetails] = useState<Workout | null>(null);
+  const [isOpen, setIsOpen] = useState(true);
 
   const handleDateClick = (date: string) => {
     const existingWorkout = workouts.find(workout => workout.date === date);
@@ -68,7 +72,10 @@ function App() {
     setShowDetails(null);
   };
 
-  // Group exercises by category for the details modal
+  const toggleNav = () => {
+    setIsOpen(!isOpen);
+  };
+
   const getGroupedExercises = (exercises: { name: string; sets: number; reps: number }[]) => {
     const grouped: { [key in ExerciseCategory]?: { name: string; sets: number; reps: number }[] } = {};
     Object.values(ExerciseCategory).forEach(category => {
@@ -82,138 +89,94 @@ function App() {
   };
 
   return (
-    <div className="App">
-      <h1 className="text-3xl font-bold text-center my-4">Calisthenics Tracker</h1>
-      <Calendar
-        workouts={workouts}
-        onDateClick={handleDateClick}
-        onEventClick={handleEventClick}
-      />
-      {selectedDate && (
-        <WorkoutForm
-          selectedDate={selectedDate}
-          onSubmit={handleFormSubmit}
-          onCancel={handleFormCancel}
-          initialExercises={initialExercises}
-          existingWorkout={editingWorkout}
-        />
-      )}
-      {showDetails && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            zIndex: 100000,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            animation: 'fadeIn 0.2s ease-out',
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: '#fff',
-              padding: '16px',
-              borderRadius: '8px',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-              width: '100%',
-              maxWidth: '400px',
-              maxHeight: '90vh',
-              overflowY: 'auto',
-              position: 'relative',
-            }}
-          >
-            {/* Close Icon */}
-            <button
-              onClick={handleDetailsClose}
-              style={{
-                position: 'absolute',
-                top: '8px',
-                right: '8px',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                padding: '4px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <svg
-                style={{ width: '24px', height: '24px', color: '#5f6368' }}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M6 18L18 6M6 6l12 12"
+    <Router>
+      <div className="App">
+        <h1 className="text-3xl font-bold text-center my-4">Calisthenics Tracker</h1>
+        <SideNav isOpen={isOpen} toggleNav={toggleNav} />
+        <div className={`main-content ${isOpen ? '' : 'nav-closed'}`}>
+          <Routes>
+            <Route
+              path="/training"
+              element={
+                <Calendar
+                  workouts={workouts}
+                  onDateClick={handleDateClick}
+                  onEventClick={handleEventClick}
+                  isOpen={isOpen} // Pass isOpen to Calendar
                 />
-              </svg>
-            </button>
-
-            {/* Modal Content */}
-            <h2 style={{ fontSize: '16px', fontWeight: 500, color: '#202124', marginBottom: '8px' }}>
-              Workout of {showDetails.date}
-            </h2>
-            <hr style={{ border: 'none', borderTop: '1px solid #dadce0', marginBottom: '16px' }} />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px' }}>
-              {Object.entries(getGroupedExercises(showDetails.exercises)).map(([category, exercises]) => (
-                <div key={category}>
-                  <h3 style={{ fontSize: '14px', fontWeight: 500, color: '#202124', marginBottom: '8px' }}>
-                    {category}
-                  </h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    {exercises.map((exercise, index) => (
-                      <div key={index} style={{ fontSize: '14px', color: '#202124' }}>
-                        {exercise.name} - {exercise.sets} sets × {exercise.reps} reps
+              }
+            />
+            <Route
+              path="*"
+              element={
+                <Calendar
+                  workouts={workouts}
+                  onDateClick={handleDateClick}
+                  onEventClick={handleEventClick}
+                  isOpen={isOpen} // Pass isOpen to Calendar
+                />
+              }
+            />
+          </Routes>
+          
+          {selectedDate && (
+            <WorkoutForm
+              selectedDate={selectedDate}
+              onSubmit={handleFormSubmit}
+              onCancel={handleFormCancel}
+              initialExercises={initialExercises}
+              existingWorkout={editingWorkout}
+            />
+          )}
+          {showDetails && (
+            <div className="modal-overlay">
+              <div className="modal-content">
+                <button className="modal-close-button" onClick={handleDetailsClose}>
+                  <svg
+                    className="modal-close-icon"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+                <h2 className="modal-title">Workout of {showDetails.date}</h2>
+                <hr className="modal-divider" />
+                <div className="modal-exercise-list">
+                  {Object.entries(getGroupedExercises(showDetails.exercises)).map(([category, exercises]) => (
+                    <div key={category} className="modal-exercise-category">
+                      <h3 className="modal-category-title">{category}</h3>
+                      <div className="modal-exercise-items">
+                        {exercises.map((exercise, index) => (
+                          <div key={index} className="modal-exercise-item">
+                            {exercise.name} - {exercise.sets} sets × {exercise.reps} reps
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+                <div className="modal-actions">
+                  <button className="modal-delete-button" onClick={() => handleDeleteWorkout(showDetails)}>
+                    Delete
+                  </button>
+                  <button className="modal-edit-button" onClick={() => handleEditWorkout(showDetails)}>
+                    Edit
+                  </button>
+                </div>
+              </div>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-              <button
-                onClick={() => handleDeleteWorkout(showDetails)}
-                style={{
-                  fontSize: '14px',
-                  color: '#d93025',
-                  background: 'none',
-                  border: '1px solid #d93025',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  padding: '8px 12px',
-                }}
-              >
-                Delete
-              </button>
-              <button
-                onClick={() => handleEditWorkout(showDetails)}
-                style={{
-                  fontSize: '14px',
-                  color: '#1a73e8',
-                  background: 'none',
-                  border: '1px solid #1a73e8',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  padding: '8px 12px',
-                }}
-              >
-                Edit
-              </button>
-            </div>
-          </div>
+          )}
         </div>
-      )}
-    </div>
+      </div>
+    </Router>
   );
 }
 
