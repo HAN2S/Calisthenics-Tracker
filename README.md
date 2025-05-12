@@ -1,6 +1,8 @@
 Calisthenics Tracker
+
 Description
 Calisthenics Tracker is a React-based web application designed to help users track their calisthenics workouts using a calendar interface. Users can add, edit, and view workout sessions, selecting exercises from predefined categories (Push, Pull, Legs). The app features a modal form for adding/editing workouts, with options to set sets and reps for each exercise, and a toggle for recurring weekly workouts. The calendar displays workout sessions, allowing users to click on a date to view or edit details.
+
 Features
 
 Interactive calendar to view and manage workout sessions.
@@ -31,13 +33,16 @@ Install the required dependencies using npm:
 npm install
 
 This will install all necessary packages, including React, FullCalendar, and other dependencies listed in package.json.
+
 4. Run the Development Server
 Start the development server to run the project locally:
 npm run dev
 
 This will start the app using Vite (or your configured build tool). You’ll see a message indicating the local server URL, typically http://localhost:5173.
+
 5. Open the App in Your Browser
 Open your web browser and navigate to the URL provided by the development server (e.g., http://localhost:5173). You should see the Calisthenics Tracker app running, with a calendar interface to manage your workouts.
+
 Additional Notes
 
 Ensure you have a stable internet connection when installing dependencies.
